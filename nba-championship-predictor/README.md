@@ -25,7 +25,7 @@ nba-championship-predictor
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/nba-championship-predictor.git
+   git clone https://github.com/egasan21/nba-championship-predictor.git
    cd nba-championship-predictor
    ```
 
