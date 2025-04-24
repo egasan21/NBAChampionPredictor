@@ -23,16 +23,20 @@ def preprocess_data(data):
     data['mov_original'] = data['mov']
     data['pace_original'] = data['pace']
     data['ts_percent_original'] = data['ts_percent']
+    data['f_tr_original'] = data['f_tr']
+    data['x3p_ar_original'] = data['x3p_ar']
+    data['age_original'] = data['age']
+    data['srs_original'] = data['srs']
 
     # Normalize numerical features
     scaler = StandardScaler()
-    numerical_features = ['o_rtg', 'd_rtg', 'win_percentage', 'mov', 'pace', 'ts_percent']
+    numerical_features = ['o_rtg', 'd_rtg', 'win_percentage', 'mov', 'pace', 'ts_percent', 'f_tr', 'x3p_ar', 'age', 'srs']
     data[numerical_features] = scaler.fit_transform(data[numerical_features])
     return data
 
 def split_data(data):
     """Split the data into training and test sets with stratification."""
-    X = data[['o_rtg', 'd_rtg', 'win_percentage', 'mov', 'pace', 'ts_percent']]
+    X = data[['o_rtg', 'd_rtg', 'win_percentage', 'mov', 'pace', 'ts_percent', 'f_tr', 'x3p_ar', 'age', 'srs']]
     y = data['champion']
 
     # Stratify ensures the class distribution is preserved in train and test sets
