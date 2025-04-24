@@ -1,4 +1,5 @@
 from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
 
 class ChampionshipPredictor:
     def __init__(self):
@@ -6,8 +7,6 @@ class ChampionshipPredictor:
         
     def train_model(self, X_train, y_train):
         """Train the model"""
-        # Example using LogisticRegression
-        from sklearn.linear_model import LogisticRegression
         self.model = LogisticRegression(class_weight='balanced')
         self.model.fit(X_train, y_train)
     
