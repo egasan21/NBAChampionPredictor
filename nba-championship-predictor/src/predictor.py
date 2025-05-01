@@ -2,7 +2,7 @@ import pandas as pd
 from models.model import ChampionshipPredictor
 from utils.data_processing import load_data, preprocess_data, split_data
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report, confusion_matrix, precision_score, recall_score, f1_score, roc_auc_score
 import matplotlib.pyplot as plt
 
 class NBAChampionshipPredictor:
@@ -52,14 +52,16 @@ class NBAChampionshipPredictor:
         precision = precision_score(y_test, y_pred)
         recall = recall_score(y_test, y_pred)
         f1 = f1_score(y_test, y_pred)
+        auroc = roc_auc_score(y_test, y_pred_proba)
         
         # Print metrics
         print("\n=== Evaluation Metrics ===")
         print(f"Accuracy:  {accuracy:.4f}")
-        print(f"Precision: {precision:.4f}  % of predicted champions that were correct")
-        print(f"Recall:    {recall:.4f}    % of actual champions correctly predicted")
+        print(f"Precision: {precision:.4f}") # of predicted champions, how many were correct
+        print(f"Recall:    {recall:.4f}")    # of actual champions correctly predicted
         print(f"F1-Score:  {f1:.4f}")         # Harmonic mean of precision/recall
-        
+        print (f"AUROC:    {auroc:.4f}")       # Area Under the Receiver Operating Characteristic curve
+
         # Detailed report
         print("\n=== Classification Report ===")
         print(classification_report(y_test, y_pred, target_names=['Non-Champion', 'Champion']))
