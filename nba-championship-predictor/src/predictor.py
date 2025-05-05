@@ -57,50 +57,38 @@ class NBAChampionshipPredictor:
         # Print metrics
         print("\n=== Evaluation Metrics ===")
         print(f"Accuracy:  {accuracy:.4f}")
-        print(f"Precision: {precision:.4f}") # of predicted champions, how many were correct
-        print(f"Recall:    {recall:.4f}")    # of actual champions correctly predicted
-        print(f"F1-Score:  {f1:.4f}")         # Harmonic mean of precision/recall
-        print (f"AUROC:    {auroc:.4f}")       # Area Under the Receiver Operating Characteristic curve
+        print(f"Precision: {precision:.4f}") 
+        print(f"Recall:    {recall:.4f}")  
+        print(f"F1-Score:  {f1:.4f}")        
+        print (f"AUROC:    {auroc:.4f}") 
 
         # Detailed report
         print("\n=== Classification Report ===")
         print(classification_report(y_test, y_pred, target_names=['Non-Champion', 'Champion']))
         
-        # Confusion matrix (optional)
-        print("\n=== Confusion Matrix ===")
-        print(confusion_matrix(y_test, y_pred))
 
     def predict(self, input_data):
-        # Convert input_data to a DataFrame with the same feature names
         input_df = pd.DataFrame(input_data, columns=['o_rtg', 'd_rtg', 'win_percentage'])
 
-        # Normalize the input data using the stored scaler
         numerical_features = ['o_rtg', 'd_rtg', 'win_percentage']
         input_df[numerical_features] = self.scaler.transform(input_df[numerical_features])  # Normalize input data
 
-        # Predict using the trained model
         return self.model.predict_championship(input_df)
 
     def predict_champion(self):
-        """Predict the champion with original (unscaled) values and normalize probabilities."""
         numerical_features = ['o_rtg', 'd_rtg', 'win_percentage', 'mov', 'pace', 'ts_percent', 'f_tr', 'x3p_ar', 'age', 'srs']
         X = self.predict_data[numerical_features]
 
-        # Ensure predict_data is a proper copy
         self.predict_data = self.predict_data.copy()
 
-        # Store raw probabilities using .loc to avoid SettingWithCopyWarning
         self.predict_data.loc[:, 'champion_probability'] = self.model.predict_proba(X)[:, 1]
 
-        # Normalize probabilities so they sum to 1
         total_probability = self.predict_data['champion_probability'].sum()
         self.predict_data.loc[:, 'champion_probability'] /= total_probability
 
-        # Get the predicted champion (team with the highest normalized probability)
         champion_idx = self.predict_data['champion_probability'].idxmax()
         predicted_champion = self.predict_data.loc[champion_idx].copy()
 
-        # Return with original values
         return pd.Series({
             'team': predicted_champion['team'],
             'srs': predicted_champion['srs_original'],
@@ -117,7 +105,6 @@ class NBAChampionshipPredictor:
         })
     
     def visualize_top_teams(self):
-        """Visualize the top 5 teams with the highest champion probabilities."""
         # Sort the prediction data by champion probability in descending order
         top_teams = self.predict_data.sort_values(by='champion_probability', ascending=False).head(8)
 
@@ -132,10 +119,8 @@ class NBAChampionshipPredictor:
         plt.show()
 
     def visualize_stat_relationship(self, stat, title):
-        """Visualize the relationship between a stat and winning a championship using box plots."""
         plt.figure(figsize=(10, 6))
 
-        # Create a box plot
         self.data.boxplot(column=stat, by='champion', grid=False, patch_artist=True, showmeans=True,
                           boxprops=dict(facecolor='yellow', color='blue'),
                           medianprops=dict(color='red'),
@@ -143,7 +128,6 @@ class NBAChampionshipPredictor:
                           whiskerprops=dict(color='black'),
                           capprops=dict(color='black'))
 
-        # Add labels and title
         plt.title(title, fontsize=16)
         plt.suptitle('')  # Remove the default "Boxplot grouped by champion" title
         plt.xlabel('Championship Status (0 = Non-Champion, 1 = Champion)', fontsize=14)
@@ -153,19 +137,16 @@ class NBAChampionshipPredictor:
         plt.show()
 
     def visualize_feature_importance(self, feature_importance, feature_names):
-        """Visualize the feature importance as a bar chart."""
         plt.figure(figsize=(10, 6))
         plt.barh(feature_names, feature_importance, color='yellow')
         plt.xlabel('Feature Importance', fontsize=14)
         plt.ylabel('Features', fontsize=14)
         plt.title('Feature Importance for Championship Prediction', fontsize=16)
-        plt.gca().invert_yaxis()  # Invert y-axis to show the most important feature at the top
+        plt.gca().invert_yaxis()  
         plt.tight_layout()
         plt.show()
 
     def visualize_correlation_heatmap(self):
-        """Generate and display a heatmap of feature correlations with descriptive labels."""
-        # Rename columns for better interpretability
         column_mapping = {
             'o_rtg_original': 'Offensive Rating',
             'd_rtg_original': 'Defensive Rating',
@@ -180,10 +161,8 @@ class NBAChampionshipPredictor:
             'champion': 'Champion'
         }
 
-        # Select relevant columns and rename them
         corr_matrix = self.data[list(column_mapping.keys())].rename(columns=column_mapping).corr()
 
-        # Print the correlation of features with the 'Champion' column
         champion_corr = corr_matrix['Champion'].sort_values(ascending=False)
         print("\n=== Feature Correlation Analysis ===")
         print(champion_corr.to_markdown())  # Pretty-print table
@@ -194,10 +173,9 @@ class NBAChampionshipPredictor:
         sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', center=0, fmt=".2f")
         plt.title("Feature Correlation Matrix", fontsize=16)
         plt.tight_layout()
-        plt.savefig('correlation_heatmap.png')  # Save the heatmap as an image
+        plt.savefig('correlation_heatmap.png') 
         plt.show()
 
-    # Feature names corresponding to the importance values
     feature_names = [
         "Offensive Rating",
         "Defensive Rating",
@@ -214,15 +192,12 @@ class NBAChampionshipPredictor:
 if __name__ == "__main__":
     predictor = NBAChampionshipPredictor()
     predictor.load_and_prepare_data('../data/Team_Summaries2.csv', predict_season=2025)  # Load only the 2025 season
-    predictor.train()  # Train the model
+    predictor.train() 
 
-    # Visualize the correlation heatmap
     predictor.visualize_correlation_heatmap()
 
-    # Retrieve feature importance values from the trained model
     feature_importance = predictor.model.get_feature_importance()
     
-    # Print a header to explain what the feature importance values represent
     print("\n===Feature Importance===")    
     print(f"o_rtg (Offensive Rating): {feature_importance[0]:.4f}")
     print(f"d_rtg (Defensive Rating): {feature_importance[1]:.4f}")
